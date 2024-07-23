@@ -91,7 +91,7 @@ var estadoPantallaPresentacion = {
 
   },
   iniciarJuego: function () {
-    juego.input.onDown.addOnce(iniciarAudio, this);
+    iniciarAudio();
     juego.state.start("principal");
   },
 };
