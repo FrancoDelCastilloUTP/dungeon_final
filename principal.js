@@ -40,12 +40,23 @@ function reiniciarJuego() {
   juego.state.restart();
 }
 
+function iniciarAudio() {
+  var musicaFondo = juego.add.audio("musicaFondo");
+  musicaFondo.loop = true; // Repetir en bucle
+  musicaFondo.volume = 0.5; // Ajustar el volumen a la mitad
+  musicaFondo.play();
+}
+
 var estadoPantallaPresentacion = {
   preload: function () {
+    juego.load.audio("musicaFondo", "audio/music.mp3");
     juego.load.image("pantallaPresentacion", "img/intro.png");
+    juego.load.image("boton", "img/btn.png");
   },
   create: function () {
     juego.add.sprite(0, 0, "pantallaPresentacion");
+
+    var boton = juego.add.button(135, 357, "boton", this.iniciarJuego, this);
 
     // Agregar el texto "Trabajo Final"
     juego.add
@@ -76,20 +87,18 @@ var estadoPantallaPresentacion = {
         { font: "30px Arial", fill: "#ffffff" }
       )
       .anchor.setTo(0.5, 0.5);
-
-    juego.time.events.add(
-      Phaser.Timer.SECOND * 2,
-      function () {
-        juego.state.start("principal");
-      },
-      this
-    );
+  },
+  iniciarJuego: function () {
+    juego.state.start("principal");
+    juego.input.onDown.addOnce(iniciarAudio, this);
+    juego.input.keyboard.onDownCallback = function () {
+      iniciarAudio();
+    };
   },
 };
 
 var estadoPrincipal = {
   preload: function () {
-    juego.load.audio("musicaFondo", "audio/music.mp3");
     juego.load.image("fondo", "img/walls_dungeon.png");
     juego.load.spritesheet("personaje", "img/player_sprites.png", 40, 50);
     juego.load.spritesheet(
@@ -235,14 +244,6 @@ var estadoPrincipal = {
       font: "14px Arial",
       fill: "#FFF",
     });
-
-    // Esperar una interacción del usuario antes de iniciar la música
-    juego.input.onDown.addOnce(function () {
-      // Reproducir la música de fondo
-      var musicaFondo = juego.add.audio("musicaFondo");
-      musicaFondo.loop = true; // Repetir en bucle
-      musicaFondo.play();
-    }, this);
   },
   update: function () {
     var moviendo = false;
