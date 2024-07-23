@@ -87,10 +87,11 @@ var estadoPantallaPresentacion = {
       )
       .anchor.setTo(0.5, 0.5);
     
-    juego.input.onDown.addOnce(iniciarAudio, this);
+    
 
   },
   iniciarJuego: function () {
+    juego.input.onDown.addOnce(iniciarAudio, this);
     juego.state.start("principal");
   },
 };
