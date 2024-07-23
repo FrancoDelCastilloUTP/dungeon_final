@@ -88,9 +88,7 @@ var estadoPantallaPresentacion = {
       .anchor.setTo(0.5, 0.5);
     
     juego.input.onDown.addOnce(iniciarAudio, this);
-    juego.input.keyboard.onDownCallback = function () {
-        iniciarAudio();
-      };
+
   },
   iniciarJuego: function () {
     juego.state.start("principal");
