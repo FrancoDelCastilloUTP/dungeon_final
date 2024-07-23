@@ -77,11 +77,6 @@ var estadoPantallaPresentacion = {
       )
       .anchor.setTo(0.5, 0.5);
 
-    // Reproducir la música de fondo
-    var musicaFondo = juego.add.audio("musicaFondo");
-    musicaFondo.loop = true; // Repetir en bucle
-    musicaFondo.play();
-
     juego.time.events.add(
       Phaser.Timer.SECOND * 2,
       function () {
@@ -240,6 +235,11 @@ var estadoPrincipal = {
       font: "14px Arial",
       fill: "#FFF",
     });
+
+    // Reproducir la música de fondo
+    var musicaFondo = juego.add.audio("musicaFondo");
+    musicaFondo.loop = true; // Repetir en bucle
+    musicaFondo.play();
   },
   update: function () {
     var moviendo = false;
