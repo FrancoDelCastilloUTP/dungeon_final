@@ -236,10 +236,13 @@ var estadoPrincipal = {
       fill: "#FFF",
     });
 
-    // Reproducir la música de fondo
-    var musicaFondo = juego.add.audio("musicaFondo");
-    musicaFondo.loop = true; // Repetir en bucle
-    musicaFondo.play();
+    // Esperar una interacción del usuario antes de iniciar la música
+    juego.input.onDown.addOnce(function () {
+      // Reproducir la música de fondo
+      var musicaFondo = juego.add.audio("musicaFondo");
+      musicaFondo.loop = true; // Repetir en bucle
+      musicaFondo.play();
+    }, this);
   },
   update: function () {
     var moviendo = false;
