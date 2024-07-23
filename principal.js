@@ -55,8 +55,7 @@ var estadoPantallaPresentacion = {
   },
   create: function () {
     juego.add.sprite(0, 0, "pantallaPresentacion");
-
-    var boton = juego.add.button(135, 357, "boton", this.iniciarJuego, this);
+    juego.add.button(135, 357, "boton", this.iniciarJuego, this);
 
     // Agregar el texto "Trabajo Final"
     juego.add
@@ -87,13 +86,14 @@ var estadoPantallaPresentacion = {
         { font: "30px Arial", fill: "#ffffff" }
       )
       .anchor.setTo(0.5, 0.5);
+    
+    juego.input.onDown.addOnce(iniciarAudio, this);
+    juego.input.keyboard.onDownCallback = function () {
+        iniciarAudio();
+      };
   },
   iniciarJuego: function () {
     juego.state.start("principal");
-    juego.input.onDown.addOnce(iniciarAudio, this);
-    juego.input.keyboard.onDownCallback = function () {
-      iniciarAudio();
-    };
   },
 };
 
