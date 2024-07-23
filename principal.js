@@ -44,7 +44,7 @@ function iniciarAudio() {
   var musicaFondo = juego.add.audio("musicaFondo");
   musicaFondo.loop = true; // Repetir en bucle
   musicaFondo.play();
-  musicaFondo.volume = 0.1;
+  musicaFondo.volume = 0.01;
 }
 
 var estadoPantallaPresentacion = {
