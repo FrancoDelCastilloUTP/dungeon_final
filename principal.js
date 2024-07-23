@@ -43,7 +43,7 @@ function reiniciarJuego() {
 function iniciarAudio() {
   var musicaFondo = juego.add.audio("musicaFondo");
   musicaFondo.loop = true; // Repetir en bucle
-  musicaFondo.volume = 0.5; // Ajustar el volumen a la mitad
+  musicaFondo.volume = 0.2; // Ajustar el volumen a la mitad
   musicaFondo.play();
 }
 
