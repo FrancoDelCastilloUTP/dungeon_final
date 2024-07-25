@@ -8,6 +8,7 @@ var teclaDerecha;
 var teclaIzquierda;
 var teclaArriba;
 var teclaAbajo;
+var moviendo;
 var ultimaDireccion;
 var contador;
 var keyAttack;
@@ -16,19 +17,19 @@ var ataqueDetectado = false;
 var contador = 0;
 var textoIntro;
 var textoVictoria;
+var puntos = 0;
 var txtPuntos;
 var llaveRecogida = false;
 var pantallaPresentacion;
 var tiempoPresentacion;
-
-function updateMouseCoordinates(pointer, x, y) {
-  console.log("Coords: x " + Math.floor(x) + ", y " + Math.floor(y));
-}
+var comandoVoz;
+var comando = "stop";
 
 function recogerLlave(persona, llave) {
   llave.destroy();
   console.log("¡Llave recogida!");
-  mostrarPantallaVictoria(persona);
+  comando = "down";
+  mostrarPantallaVictoria();
   juego.time.events.add(Phaser.Timer.SECOND * 2, reiniciarJuego, this);
 }
 
@@ -43,8 +44,32 @@ function reiniciarJuego() {
 function iniciarAudio() {
   var musicaFondo = juego.add.audio("musicaFondo");
   musicaFondo.loop = true; // Repetir en bucle
+  musicaFondo.volume = 0.5; // Ajustar el volumen a la mitad
   musicaFondo.play();
-  musicaFondo.volume = 0.08;
+}
+
+function stopMovement() {
+  comando = "stop";
+  if (attacking) {
+    attacking = false;
+    moviendo = false;
+  }
+  if (moviendo) {
+    moviendo = false;
+    attacking = false;
+  }
+  if (!attacking) {
+    if (ultimaDireccion === "arriba") {
+      persona.animations.play("idleBack");
+    } else if (ultimaDireccion === "derecha") {
+      persona.animations.play("idleRight");
+    } else if (ultimaDireccion === "izquierda") {
+      persona.scale.x = -1;
+      persona.animations.play("idleRight");
+    } else if (ultimaDireccion === "abajo") {
+      persona.animations.play("idle");
+    }
+  }
 }
 
 var estadoPantallaPresentacion = {
@@ -55,6 +80,7 @@ var estadoPantallaPresentacion = {
   },
   create: function () {
     juego.add.sprite(0, 0, "pantallaPresentacion");
+
     juego.add.button(135, 357, "boton", this.iniciarJuego, this);
 
     // Agregar el texto "Trabajo Final"
@@ -86,13 +112,29 @@ var estadoPantallaPresentacion = {
         { font: "30px Arial", fill: "#ffffff" }
       )
       .anchor.setTo(0.5, 0.5);
-    
-    
 
+    // Configuración de reconocimiento de voz
+    comandoVoz = new (window.SpeechRecognition ||
+      window.webkitSpeechRecognition)();
+    comandoVoz.lang = "en-US";
+    comandoVoz.continuous = true;
+    comandoVoz.interimResults = false;
+
+    // Iniciar reconocimiento de voz
+    comandoVoz.start();
+
+    // Error handling
+    comandoVoz.onerror = function (event) {
+      console.error(event.error);
+    };
   },
+
   iniciarJuego: function () {
-    iniciarAudio();
     juego.state.start("principal");
+    juego.input.onDown.addOnce(iniciarAudio, this);
+    juego.input.keyboard.onDownCallback = function () {
+      iniciarAudio();
+    };
   },
 };
 
@@ -166,6 +208,7 @@ var estadoPrincipal = {
 
     // TECLA ATAQUE
     keyAttack = juego.input.keyboard.addKey(Phaser.Keyboard.A);
+    contador = 0;
 
     // ANIMACIONES POR DEFECTO
     persona.animations.play("idle");
@@ -212,10 +255,6 @@ var estadoPrincipal = {
     colisionDerechaInferior.body.setSize(20, 220);
     colisionDerechaInferior.body.immovable = true;
 
-    contador = 0;
-
-    // juego.input.addMoveCallback(updateMouseCoordinates, this);
-
     //TEXTO INTRO
     textoIntro = juego.add.text(
       juego.world.centerX,
@@ -236,29 +275,31 @@ var estadoPrincipal = {
     textoVictoria.anchor.setTo(0.5, 0.5);
     textoVictoria.visible = false;
 
-    //puntaje en pantalla
+    // PUNTAJE
     puntos = 0;
     juego.add.text(20, 20, "Puntos: ", { font: "14px Arial", fill: "#FFF" });
-    txtPuntos = juego.add.text(80, 20, "", {
+    txtPuntos = juego.add.text(80, 20, "0", {
       font: "14px Arial",
       fill: "#FFF",
     });
   },
   update: function () {
-    var moviendo = false;
+    comandoVoz.onresult = function (event) {
+      comando = event.results[event.results.length - 1][0].transcript
+        .trim()
+        .toLowerCase();
+
+      console.log("Comando Voz:", comando);
+    };
+
+    moviendo = false;
 
     // Verificar colisiones entre el personaje y las zonas de colisión
     juego.physics.arcade.collide(persona, colisiones);
     juego.physics.arcade.collide(enemigo, colisiones);
     juego.physics.arcade.collide(persona, llave, recogerLlave, null, this);
 
-    persona.body.velocity.x = 0;
-    persona.body.velocity.y = 0;
-
     if (llave.visible === false && llaveRecogida === false) {
-      console.log("llave recogida");
-      persona_ataques.visible = false;
-      persona.visible = false;
       puntos += 1000;
       txtPuntos.text = puntos;
       llaveRecogida = true;
@@ -269,6 +310,68 @@ var estadoPrincipal = {
       persona.visible = true;
     }
 
+    // Manejar resultados de reconocimiento de voz
+
+    if (comando == "stop" && !moviendo) {
+      persona.body.velocity.x = 0;
+      persona.body.velocity.y = 0;
+    } else if (comando == "attack" && !moviendo) {
+      attacking = true;
+      persona_ataques.position.x = persona.position.x;
+      persona_ataques.position.y = persona.position.y;
+      persona_ataques.visible = true;
+      persona.visible = false;
+      persona_ataques.animations.play("attackBack").onComplete.add(function () {
+        persona.animations.play("idleBack");
+      });
+      juego.time.events.add(Phaser.Timer.SECOND * 0.5, stopMovement, this);
+    } else if (comando && !moviendo) {
+      switch (comando) {
+        case "right":
+          persona.body.velocity.x = 10;
+          persona.position.x += 2;
+          persona.scale.x = 1;
+          persona.animations.play("moveDerecha");
+          moviendo = true;
+          attacking = false;
+          ultimaDireccion = "derecha";
+          juego.time.events.add(Phaser.Timer.SECOND * 0.4, stopMovement, this);
+          break;
+        case "left":
+          persona.position.x -= 2;
+          persona.body.velocity.x = -10;
+          persona.scale.x = -1;
+          persona.animations.play("moveDerecha");
+          moviendo = true;
+          attacking = false;
+          ultimaDireccion = "izquierda";
+          juego.time.events.add(Phaser.Timer.SECOND * 0.4, stopMovement, this);
+          break;
+        case "go up":
+          persona.position.y -= 2;
+          persona.body.velocity.y = -10;
+          persona.animations.play("moveArriba");
+          moviendo = true;
+          attacking = false;
+          ultimaDireccion = "arriba";
+          juego.time.events.add(Phaser.Timer.SECOND * 0.5, stopMovement, this);
+          break;
+        case "down":
+          persona.body.velocity.y = 10;
+          persona.position.y += 2;
+          persona.animations.play("moveAbajo");
+          moviendo = true;
+          attacking = false;
+          ultimaDireccion = "abajo";
+          juego.time.events.add(Phaser.Timer.SECOND * 0.5, stopMovement, this);
+          break;
+        default:
+          console.log("Comando no reconocido");
+          return;
+      }
+    }
+
+    // MOVIMIENTO CON TECLADO
     if (teclaDerecha.isDown) {
       persona.body.velocity.x = 10;
       persona.position.x += 2;
@@ -391,7 +494,7 @@ var estadoPrincipal = {
       persona.y >= enemigo.y &&
       persona.y <= enemigo.y + persona.y / 2
     ) {
-      if (keyAttack.isDown) {
+      if (keyAttack.isDown || attacking) {
         // Verificar si la tecla A está presionada
         if (
           persona.y > enemigo.y &&
@@ -407,7 +510,7 @@ var estadoPrincipal = {
             console.log("Contador de ataques:", contador);
             ataqueDetectado = true; // Marcar que el ataque ha sido detectado
 
-            if (contador === 3) {
+            if (contador === 2) {
               enemigo.kill();
               puntos += 100;
               txtPuntos.text = puntos;
@@ -419,11 +522,6 @@ var estadoPrincipal = {
       }
     }
   },
-
-  // render: function () {
-  //   juego.debug.body(persona, "rgba(0, 255, 0, 0.2)");
-  //   juego.debug.body(enemigo, "rgba(255, 0, 0, 0.2)");
-  // },
 };
 
 juego.state.add("pantallaPresentacion", estadoPantallaPresentacion);
