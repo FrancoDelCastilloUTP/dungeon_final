@@ -113,6 +113,51 @@ var estadoPantallaPresentacion = {
       )
       .anchor.setTo(0.5, 0.5);
 
+    juego.add
+      .text(
+        juego.world.centerX,
+        juego.world.centerY - 230, // Ajusta la posición vertical
+        "Comandos de Voz en Inglés",
+        { font: "12px Arial", fill: "#ffffff" }
+      )
+      .anchor.setTo(0.5, 0.5);
+
+    juego.add
+      .text(
+        juego.world.centerX,
+        juego.world.centerY - 210, // Ajusta la posición vertical
+        "Go up => Ir hacia Arriba",
+        { font: "12px Arial", fill: "#ffffff" }
+      )
+      .anchor.setTo(0.5, 0.5);
+
+    juego.add
+      .text(
+        juego.world.centerX,
+        juego.world.centerY - 190, // Ajusta la posición vertical
+        "Down => Ir hacia Abajo",
+        { font: "12px Arial", fill: "#ffffff" }
+      )
+      .anchor.setTo(0.5, 0.5);
+
+    juego.add
+      .text(
+        juego.world.centerX,
+        juego.world.centerY - 170, // Ajusta la posición vertical
+        "Left => Ir hacia Izquierda",
+        { font: "12px Arial", fill: "#ffffff" }
+      )
+      .anchor.setTo(0.5, 0.5);
+
+    juego.add
+      .text(
+        juego.world.centerX,
+        juego.world.centerY - 150, // Ajusta la posición vertical
+        "Right => Ir hacia Derecha",
+        { font: "12px Arial", fill: "#ffffff" }
+      )
+      .anchor.setTo(0.5, 0.5);
+
     // Configuración de reconocimiento de voz
     comandoVoz = new (window.SpeechRecognition ||
       window.webkitSpeechRecognition)();
