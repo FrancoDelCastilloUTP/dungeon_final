@@ -175,11 +175,7 @@ var estadoPantallaPresentacion = {
   },
 
   iniciarJuego: function () {
-    juego.state.start("principal");
-    juego.input.onDown.addOnce(iniciarAudio, this);
-    juego.input.keyboard.onDownCallback = function () {
       iniciarAudio();
-    };
   },
 };
 
