@@ -175,7 +175,8 @@ var estadoPantallaPresentacion = {
   },
 
   iniciarJuego: function () {
-      iniciarAudio();
+    juego.state.start("principal");
+    iniciarAudio();
   },
 };
 
